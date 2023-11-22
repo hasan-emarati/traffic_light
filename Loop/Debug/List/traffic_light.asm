@@ -1272,87 +1272,109 @@ _main:
 ; 0000 0024       DDRD = 0B11111111;
 	OUT  0x11,R30
 ; 0000 0025 
-; 0000 0026       while (1)
-_0x4:
-; 0000 0027       {
-; 0000 0028             for(i=40 ; i>=0 ; i--)
-	LDI  R30,LOW(40)
-	LDI  R31,HIGH(40)
-	MOVW R4,R30
-_0x8:
-	CLR  R0
-	CP   R4,R0
-	CPC  R5,R0
-	BRLT _0x9
-; 0000 0029             {
-; 0000 002A                   //PORTA.7=1;
-; 0000 002B                   PORTC=(0<<PORTC7);
-	LDI  R30,LOW(0)
-	OUT  0x15,R30
-; 0000 002C                   PORTA=(1<<PORTA7) | seg[i/10];
+; 0000 0026       PORTA = seg[i];
 	RCALL SUBOPT_0x0
 	OUT  0x1B,R30
-; 0000 002D                   PORTB=seg[i%10];
-	RCALL SUBOPT_0x1
+; 0000 0027       PORTB = seg[i];
+	RCALL SUBOPT_0x0
 	OUT  0x18,R30
-; 0000 002E                   delay_ms(500);
-	LDI  R26,LOW(500)
-	LDI  R27,HIGH(500)
-	CALL _delay_ms
-; 0000 002F                   if (i == 0)
-	MOV  R0,R4
-	OR   R0,R5
-	BRNE _0xA
-; 0000 0030                   {
-; 0000 0031                         PORTA=(0<<PORTA7);
-	LDI  R30,LOW(0)
-	OUT  0x1B,R30
-; 0000 0032                         PORTD.7=1;
+; 0000 0028       PORTC = seg[i];
+	RCALL SUBOPT_0x0
+	OUT  0x15,R30
+; 0000 0029       PORTD = seg[i];
+	RCALL SUBOPT_0x0
+	OUT  0x12,R30
+; 0000 002A 
+; 0000 002B       while (1)
+_0x4:
+; 0000 002C       {
+; 0000 002D             PORTD.7=1;
 	SBI  0x12,7
-; 0000 0033                         delay_ms(3000);
+; 0000 002E             delay_ms(3000);
 	LDI  R26,LOW(3000)
 	LDI  R27,HIGH(3000)
 	CALL _delay_ms
-; 0000 0034                         for(i=40 ; i>=0 ; i--)
+; 0000 002F             PORTD.7=0;
+	CBI  0x12,7
+; 0000 0030             for(i=40 ; i>=0 ; i--)
 	LDI  R30,LOW(40)
 	LDI  R31,HIGH(40)
 	MOVW R4,R30
-_0xE:
+_0xC:
 	CLR  R0
 	CP   R4,R0
 	CPC  R5,R0
-	BRLT _0xF
-; 0000 0035                         {
-; 0000 0036                               //PORTC.7=1;
-; 0000 0037                               PORTC=(1<<PORTC7) | seg[i/10];
-	RCALL SUBOPT_0x0
-	OUT  0x15,R30
-; 0000 0038                               PORTD=seg[i%10];
+	BRLT _0xD
+; 0000 0031             {
+; 0000 0032                   //PORTA.7=1;
+; 0000 0033                   PORTA=(1<<PORTA7) | seg[i/10];
 	RCALL SUBOPT_0x1
-	OUT  0x12,R30
-; 0000 0039                               delay_ms(500);
-	LDI  R26,LOW(500)
-	LDI  R27,HIGH(500)
+	ORI  R30,0x80
+	OUT  0x1B,R30
+; 0000 0034                   PORTB=seg[i%10];
+	RCALL SUBOPT_0x2
+	OUT  0x18,R30
+; 0000 0035                   delay_ms(500);
+	RCALL SUBOPT_0x3
+; 0000 0036                   if (i == 0)
+	BRNE _0xE
+; 0000 0037                   {
+; 0000 0038                         PORTA=(0<<PORTA7)| seg[i/10];
+	RCALL SUBOPT_0x1
+	OUT  0x1B,R30
+; 0000 0039                         PORTD.7=1;
+	SBI  0x12,7
+; 0000 003A                         delay_ms(3000);
+	LDI  R26,LOW(3000)
+	LDI  R27,HIGH(3000)
 	CALL _delay_ms
-; 0000 003A                         }
+; 0000 003B                         for(i=40 ; i>=0 ; i--)
+	LDI  R30,LOW(40)
+	LDI  R31,HIGH(40)
+	MOVW R4,R30
+_0x12:
+	CLR  R0
+	CP   R4,R0
+	CPC  R5,R0
+	BRLT _0x13
+; 0000 003C                         {
+; 0000 003D                               //PORTC.7=1;
+; 0000 003E                               PORTC=(1<<PORTC7) | seg[i/10];
+	RCALL SUBOPT_0x1
+	ORI  R30,0x80
+	OUT  0x15,R30
+; 0000 003F                               PORTD=seg[i%10];
+	RCALL SUBOPT_0x2
+	OUT  0x12,R30
+; 0000 0040                               delay_ms(500);
+	RCALL SUBOPT_0x3
+; 0000 0041                               if (i == 0)
+	BRNE _0x14
+; 0000 0042                               {
+; 0000 0043                                     PORTC=(0<<PORTC7) | seg[i/10];
+	RCALL SUBOPT_0x1
+	OUT  0x15,R30
+; 0000 0044                               }
+; 0000 0045                         }
+_0x14:
 	MOVW R30,R4
 	SBIW R30,1
 	MOVW R4,R30
-	RJMP _0xE
-_0xF:
-; 0000 003B                   }
-; 0000 003C             }
-_0xA:
+	RJMP _0x12
+_0x13:
+; 0000 0046                   }
+; 0000 0047             }
+_0xE:
 	MOVW R30,R4
 	SBIW R30,1
 	MOVW R4,R30
-	RJMP _0x8
-_0x9:
-; 0000 003D       }
+	RJMP _0xC
+_0xD:
+; 0000 0048       }
 	RJMP _0x4
-; 0000 003E }
-_0x10:
-	RJMP _0x10
+; 0000 0049 }
+_0x15:
+	RJMP _0x15
 ; .FEND
 
 	.DSEG
@@ -1360,8 +1382,17 @@ _seg:
 	.BYTE 0xB
 
 	.CSEG
-;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:4 WORDS
+;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:6 WORDS
 SUBOPT_0x0:
+	LDI  R26,LOW(_seg)
+	LDI  R27,HIGH(_seg)
+	ADD  R26,R4
+	ADC  R27,R5
+	LD   R30,X
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:15 WORDS
+SUBOPT_0x1:
 	MOVW R26,R4
 	LDI  R30,LOW(10)
 	LDI  R31,HIGH(10)
@@ -1369,11 +1400,10 @@ SUBOPT_0x0:
 	SUBI R30,LOW(-_seg)
 	SBCI R31,HIGH(-_seg)
 	LD   R30,Z
-	ORI  R30,0x80
 	RET
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:3 WORDS
-SUBOPT_0x1:
+SUBOPT_0x2:
 	MOVW R26,R4
 	LDI  R30,LOW(10)
 	LDI  R31,HIGH(10)
@@ -1381,6 +1411,15 @@ SUBOPT_0x1:
 	SUBI R30,LOW(-_seg)
 	SBCI R31,HIGH(-_seg)
 	LD   R30,Z
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
+SUBOPT_0x3:
+	LDI  R26,LOW(500)
+	LDI  R27,HIGH(500)
+	CALL _delay_ms
+	MOV  R0,R4
+	OR   R0,R5
 	RET
 
 

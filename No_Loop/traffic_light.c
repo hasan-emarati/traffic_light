@@ -345,6 +345,7 @@ void main(void)
             PORTD = 0B00111111;
             PORTC = 0B10111111;
             delay_ms(1000);
+            PORTC = 0B00000000;
             }
             // 10 -> 00
       }

@@ -35,18 +35,25 @@ void main(void)
       DDRC = 0B11111111;
       DDRD = 0B11111111;
 
+      PORTA = seg[i];
+      PORTB = seg[i];
+      PORTC = seg[i];
+      PORTD = seg[i];
+
       while (1)
       { 
+            PORTD.7=1;
+            delay_ms(3000);
+            PORTD.7=0;
             for(i=40 ; i>=0 ; i--)
             {
                   //PORTA.7=1;
-                  PORTC=(0<<PORTC7);
                   PORTA=(1<<PORTA7) | seg[i/10];
                   PORTB=seg[i%10]; 
                   delay_ms(500);
                   if (i == 0)
                   {
-                        PORTA=(0<<PORTA7);
+                        PORTA=(0<<PORTA7)| seg[i/10];
                         PORTD.7=1;
                         delay_ms(3000);
                         for(i=40 ; i>=0 ; i--)
@@ -55,6 +62,10 @@ void main(void)
                               PORTC=(1<<PORTC7) | seg[i/10];
                               PORTD=seg[i%10]; 
                               delay_ms(500);
+                              if (i == 0)
+                              {
+                                    PORTC=(0<<PORTC7) | seg[i/10];
+                              }
                         }
                   }    
             }
